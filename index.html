@@ -83,7 +83,7 @@
             let sim = d3.forceSimulation()
                 .nodes(nodes)
                 .force('links', d3.forceLink().links(links).id(d => d['id'])) // force keeping nodes linked together close
-                .force('repulse', d3.forceManyBody().strength(-30)) // repulsion between all nodes to space them apart
+                .force('repulse', d3.forceManyBody().strength(-60)) // repulsion between all nodes to space them apart
                 .force('center', d3.forceCenter(chartWidth / 2., chartHeight / 2.)) // keep the whole network centered
                 .on('tick', render);
 
@@ -119,7 +119,7 @@
                         enter => enter.append('circle')
                             .attr('class', 'node')
                             .attr('stroke', 'black')
-                            .attr('r', 9)
+                            .attr('r', 10)
                             .attr('cx', 0)
                             .attr('cy', 0)
                             .attr('fill', d => d.id === 0 ? 'sienna' : 'white')
@@ -334,7 +334,7 @@
                     d3.select(this)
                         .attr('stroke-width', 1)
                         .transition().duration(200)
-                        .attr('r', 9);
+                        .attr('r', 10);
                     removeLabel();
                 }
             }
