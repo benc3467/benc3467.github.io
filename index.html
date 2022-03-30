@@ -1,1 +1,202 @@
-Hello World
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tampopo project</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/marx-css/css/marx.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+</head>
+
+<body>
+    <main>
+        <section>
+            <h1>Character Connections in Tampopo</h1>
+            <article>
+                Tampopo is a film with a multitude of characters, both in the main story and the many
+                vignettes. This graph attempts to capture the structure of Tampopo and display it in a
+                way that encourages the development of new understandings of the film.
+            </article>
+            <article>
+                Hopefully you will be able to learn things and take away something from this graph that
+                was not immediately clear from a simple linear viewing of the film.
+            </article>
+            <article>
+                Each node represents a character, and characters are connected with an edge if they appear in
+                the same shot at least once during the runtime of the film. They are considered to appear in the
+                same shot if they are either both visible on screen in a shot, or if they are implied to be in the
+                same shot even if one or both are not visible (such as if one is in a car in the background).
+            </article>
+        </section>
+    </main>
+    <div class="center">
+        <svg id="network" height="500" width="1200"></svg>
+    </div>
+
+
+
+
+    <script>
+        // heavily inspired by Jeff R's INFO 3300 Fall 2021 notes
+        const svg = d3.select('#network');
+        const networkLayer = svg.append('g');
+        const chartWidth = svg.attr('width');
+        const chartHeight = svg.attr('height');
+
+        const createNetwork = async function () {
+            const appearances = await d3.csv("./data/appearances.csv");
+            const nodes = await d3.csv("./data/characters.csv");
+            let appearancesMatrix = [];
+
+            // convert to 2d array and parse ints
+            for (let i = 0; i < nodes.length; i++) {
+                nodes[i]['id'] = parseInt(nodes[i]['id']);
+                let curr = appearances[i];
+                let row = [];
+                for (let j = 0; j < nodes.length; j++) {
+                    row.push(parseInt(curr[j]));
+                }
+                appearancesMatrix.push(row);
+            }
+
+            console.log(appearancesMatrix);
+            console.log(nodes);
+
+            let links = [];
+
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i; j < nodes.length; j++) {
+                    if (appearancesMatrix[i][j] === 1 && i !== j) {
+                        sourceID = nodes[i]['id'];
+                        targetID = nodes[j]['id'];
+                        link = { 'source': sourceID, 'target': targetID };
+                        links.push(link);
+                    }
+                }
+            }
+            console.log(links);
+
+
+            let sim = d3.forceSimulation()
+                .nodes(nodes)
+                .force('links', d3.forceLink().links(links).id(d => d['id'])) // force keeping nodes linked together close
+                .force('repulse', d3.forceManyBody().strength(-30)) // repulsion between all nodes to space them apart
+                .force('center', d3.forceCenter(chartWidth / 2., chartHeight / 2.)) // keep the whole network centered
+                .on('tick', render);
+
+            // TODO:
+            // - make names easier to read
+            // - change color of Tampopo
+            // - change color and size/stroke of nodes on hover
+            // - show names of connected nodes on drag (maybe in side graph as hard in visualization)
+            // - write explanation of the graph above
+            // - check connections to see if they make sense (Pisuken connected with man in white suit?)
+            // - remove some characters?
+            function render() {
+                // draw edges
+                let lines = networkLayer.selectAll('line.link').data(links)
+                    .join(
+                        enter => enter.append('line').attr('class', 'link').attr('stroke', 'black')
+                    )
+                    .attr('x1', d => d.source.x)
+                    .attr('x2', d => d.target.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('y2', d => d.target.y);
+
+                // draw nodes
+                let circles = networkLayer.selectAll('circle.node').data(nodes)
+                    .join(
+                        enter => enter.append('circle')
+                            .attr('class', 'node')
+                            .attr('stroke', 'black')
+                            .attr('r', 8)
+                            .attr('cx', 0)
+                            .attr('cy', 0)
+                            .attr('fill', d => {
+                                if (d.id == 0) {
+                                    return 'sienna';
+                                } else {
+                                    return 'white'
+                                }
+                            })
+                            .on('mouseover', handleHover)
+                            .on('mousemove', handleHover)
+                            .on('mouseout', handleMouseOut)
+                            .call(d3.drag().on('start', dragStart).on('drag', dragging).on('end', dragend))
+
+                    )
+                    .attr('transform', d => `translate(${d.x}, ${d.y})`);
+
+            }
+
+            render();
+            var label = networkLayer
+                .append('text')
+                .attr('dominant-baseline', 'middle')
+                .attr('id', 'label') // displays character name on hover
+            // .attr('background-color', 'white')
+
+            var mouseClicked = false;
+
+            function dragStart(event, d) {
+                if (!event.active) {
+                    label.text(d.name);
+                    sim.alphaTarget(0.08).restart();
+                }
+
+                d.fx = event.x;
+                d.fy = event.y;
+
+                label.attr('x', event.x + 12).attr('y', event.y);
+                mouseClicked = true;
+            }
+
+            function dragging(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+                label.attr('x', event.x + 12).attr('y', event.y);
+            }
+
+            function dragend(event, d) {
+                if (!event.active) {
+                    sim.alphaTarget(0);
+                    label.text('');
+                }
+
+                d.fx = null;
+                d.fy = null;
+                mouseClicked = false;
+            }
+
+            function updateLabel(d) {
+                label
+                    .text(d.name)
+                    .attr('x', d.x + 12)
+                    .attr('y', d.y);
+            }
+
+
+            function handleHover(event, d) {
+                if (!mouseClicked) {
+                    d3.select(this)
+                        .transition().duration(120)
+                        .attr('r', 12);
+                    updateLabel(d3.select(this).datum());
+                }
+            }
+
+            function handleMouseOut(event, d) {
+                if (!mouseClicked) {
+                    d3.select(this)
+                        .transition().duration(120)
+                        .attr('r', 8);
+                    label.text('');
+                }
+            }
+        }
+        createNetwork();
+
+    </script>
+</body>
+
+</html>
