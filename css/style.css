@@ -1,5 +1,5 @@
 body {
-    background-color: lightgoldenrodyellow;
+    background-color: lemonchiffon;
     font-family: 'Nunito', sans-serif;
 }
 
@@ -14,4 +14,12 @@ h1 {
 .center {
     width: 1200px;
     margin: 0 auto;
+}
+
+#network {
+    margin-bottom: 100px;
+}
+
+main {
+    padding-bottom: 0;
 }
