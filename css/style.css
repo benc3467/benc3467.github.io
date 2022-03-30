@@ -1,5 +1,14 @@
 body {
     background-color: lightgoldenrodyellow;
+    font-family: 'Nunito', sans-serif;
+}
+
+h1 {
+    font-weight: bold;
+}
+
+#label {
+    font-family: 'Nunito', sans-serif;
 }
 
 .center {
