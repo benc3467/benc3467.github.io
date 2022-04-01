@@ -350,6 +350,8 @@
             // - https://d3-graph-gallery.com/graph/chord_interactive.html
             // - https://d3-graph-gallery.com/graph/chord_axis_labels.html
 
+            // TODO:
+            // - check label distance - maybe varies per machine
             const chordSvg = d3.select('#chord');
             const foodData = await d3.csv("./data/food.csv");
             console.log(foodData);
