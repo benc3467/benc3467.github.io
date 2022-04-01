@@ -416,8 +416,9 @@
 
             function updateChordLabel(event, d) {
                 let text = foodMatrix[d.source.index][d.target.index] + ' shared meals';
-                let x = event.x - 430;
-                let y = event.y - 230;
+                console.log(event);
+                let x = event.layerX;
+                let y = event.layerY;
                 chordLabel
                     .text(text)
                     .attr('x', x + 17)
