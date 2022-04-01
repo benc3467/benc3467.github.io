@@ -35,9 +35,13 @@
     <div class="center">
         <svg id="network" height="500" width="1200"></svg>
     </div>
-
-
-
+    <div id="chord-container">
+        <svg id="chord" height="600" width="1000"></svg>
+    </div>
+    <div id="button-container">
+        <button id="ramen">Ramen color scheme</button>
+        <button id="normal">Normal color scheme</button>
+    </div>
 
     <script>
         // heavily inspired by Jeff R's INFO 3300 Fall 2021 notes
@@ -46,7 +50,7 @@
         const chartWidth = svg.attr('width');
         const chartHeight = svg.attr('height');
 
-        const createNetwork = async function () {
+        const createGraphs = async function () {
             const appearances = await d3.csv("./data/appearances.csv");
             const nodes = await d3.csv("./data/characters.csv");
             let appearancesMatrix = [];
@@ -98,7 +102,6 @@
             // TODO:
             // - is it better for the tags and nodes to go above info box or below it?
             // make the nodes and lines bigger?
-            // - show names of connected nodes on drag (maybe in side graph as hard in visualization)
             // - write explanation of the graph above
             // - check connections to see if they make sense
             // - remove some characters?
@@ -149,7 +152,7 @@
                 .attr('width', 0)
                 .attr('color', 'white')
                 .attr('stroke', 'black')
-                .attr('stroke-width', 3)
+                .attr('stroke-width', 4)
                 .attr('rx', 5)
                 .attr('ry', 5);
 
@@ -338,8 +341,208 @@
                     removeLabel();
                 }
             }
+
+            // ==============================
+            // CHORD DIAGRAM CODE STARTS HERE
+            // ==============================
+
+            // heavy inspiration from :
+            // - https://d3-graph-gallery.com/graph/chord_interactive.html
+            // - https://d3-graph-gallery.com/graph/chord_axis_labels.html
+
+            const chordSvg = d3.select('#chord');
+            const foodData = await d3.csv("./data/food.csv");
+            console.log(foodData);
+            let counts = {};
+            let chordIDs = [0, 1, 2, 5, 15, 23]; // only look at certain characters
+            let chordCharacters = [
+                { 'id': 0, 'name': 'Tampopo' },
+                { 'id': 1, 'name': 'Goro' },
+                { 'id': 2, 'name': 'Gun' },
+                { 'id': 3, 'name': 'Pisuken' },
+                { 'id': 4, 'name': 'Noodle-making master' },
+                { 'id': 5, 'name': 'Shohei' }
+            ]
+            let idMap = {
+                0: 0,
+                1: 1,
+                2: 2,
+                5: 3,
+                15: 4,
+                23: 5
+            }; // mapping the previous characterIDs to the new IDs
+            let colors = ['cornflowerblue', 'tomato', 'white', 'darkolivegreen', 'blanchedalmond', 'black']
+            // let colors = ['blanchedalmond', 'rgb(195,138,138)', 'darkolivegreen', 'pink', 'rgb(193,224,137)']
+
+            const foodMatrix = new Array(6).fill(0).map(() => new Array(6).fill(0));
+            console.log(foodMatrix);
+
+            // convert to dense matrix and parse ints
+            for (let link in foodData) {
+                let source = parseInt(foodData[link]['id_1']);
+                let target = parseInt(foodData[link]['id_2']);
+                if (chordIDs.includes(source) && chordIDs.includes(target)) {
+                    foodMatrix[idMap[source]][idMap[target]] += 1;
+                    foodMatrix[idMap[target]][idMap[source]] += 1;
+
+                }
+            }
+            console.log(foodMatrix);
+
+            let chordDiagram = chordSvg.append('g').attr('transform', 'translate(500 300)');
+            let chord = d3.chord().sortSubgroups(d3.descending).padAngle(0.05)(foodMatrix);
+
+            let chordLabelBackground = chordSvg
+                .append('rect')
+                .attr('class', 'label-background')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('height', 22)
+                .attr('width', 0)
+                .attr('color', 'white')
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('rx', 2)
+                .attr('ry', 2)
+                .attr('visibility', 'hidden');
+
+            let chordLabel = chordSvg
+                .append('text')
+                .attr('dominant-baseline', 'middle')
+                .attr('id', 'label')
+                .attr('font-weight', 'bold');
+
+            function updateChordLabel(event, d) {
+                let text = foodMatrix[d.source.index][d.target.index] + ' shared meals';
+                let x = event.x - 340;
+                let y = event.y - 230;
+                chordLabel
+                    .text(text)
+                    .attr('x', x + 17)
+                    .attr('y', y);
+
+                // calculate width using length of string
+                let width = convertLength(text) + 6;
+
+                chordLabelBackground
+                    .attr('visibility', '')
+                    .attr('width', width)
+                    .attr('x', x + 14)
+                    .attr('y', y - 12);
+            }
+
+            function removeChordLabel() {
+                chordLabel.text('');
+                chordLabelBackground
+                    .attr('visibility', 'hidden');
+            }
+
+            let backgroundCircle = chordDiagram.append('circle')
+                .attr('cx', 0)
+                .attr('cy', 0)
+                .attr('r', 200)
+                .attr('fill', 'sandybrown');
+
+            console.log(chord);
+            let group = chordDiagram.datum(chord)
+                .append('g')
+                .selectAll('g')
+                .data(d => d.groups)
+                .enter();
+
+            group
+                .append('g')
+                .append('path')
+                // .style('fill', 'lightsteelblue')
+                .attr('class', 'outer-band')
+                .style('fill', 'darkred')
+                .style('stroke', 'black')
+                .attr("d", d3.arc()
+                    .innerRadius(200)
+                    .outerRadius(220)
+                );
+
+            chordDiagram
+                .datum(chord)
+                .append('g')
+                .selectAll('path')
+                .data(d => d)
+                .enter()
+                .append('path')
+                .attr('d', d3.ribbon()
+                    .radius(200)
+                )
+                .attr('class', 'ribbon')
+                // .style('fill', d => colors[d.source.index])
+                .style('fill', 'blanchedalmond')
+                .style('stroke', 'black')
+                .style('opacity', 0.8)
+                .on('mouseover', mouseOverChord)
+                .on('mousemove', mouseOverChord)
+                .on('mouseleave', mouseLeaveChord);
+
+            function mouseOverChord(event, d) {
+                d3.select(this)
+                    .attr('stroke-width', 2)
+                    .transition().duration(200)
+                    .style('opacity', 1);
+                updateChordLabel(event, d3.select(this).datum());
+            }
+
+            function mouseLeaveChord(event, d) {
+                d3.select(this)
+                    .attr('stroke-width', 1)
+                    .transition().duration(200)
+                    .style('opacity', 0.8);
+                removeChordLabel();
+            }
+
+            // Add the labels for the groups
+            group
+                .selectAll('.group-tick-label')
+                .data(d => groupLabels(d))
+                .enter()
+                .append('g')
+                .attr('transform', d => `rotate(${d.angle * 180 / Math.PI - 90}) translate(220,0)`)
+                .append('text')
+                .attr('x', 8)
+                .attr('dy', '.35em')
+                .attr('transform', function (d) { return d.angle > Math.PI ? 'rotate(180) translate(-16)' : null; })
+                .style('text-anchor', function (d) { return d.angle > Math.PI ? 'end' : null; })
+                .text(d => chordCharacters[d.id]['name'])
+                .style('font-size', 20)
+
+            function groupLabels(d) {
+                return [{ id: d.index, angle: (d.startAngle + d.endAngle) / 2 }];
+            }
+
+            d3.select('#ramen').style('background-color', 'rgb(47, 71, 116)');
+            d3.select('#normal').style('background-color', 'cornflowerblue');
+
+            d3.select('#ramen').on('click', () => {
+                d3.selectAll('.ribbon')
+                    .style('fill', 'blanchedalmond');
+                d3.selectAll('.outer-band')
+                    .style('fill', 'darkred');
+                backgroundCircle
+                    .attr('fill', 'sandybrown');
+                d3.select('#ramen').style('background-color', 'rgb(47, 71, 116)');
+                d3.select('#normal').style('background-color', 'cornflowerblue');
+            })
+
+            d3.select('#normal').on('click', () => {
+                d3.selectAll('.ribbon')
+                    .style('fill', d => colors[d.source.index]);
+                d3.selectAll('.outer-band')
+                    .style('fill', 'lightsteelblue');
+                backgroundCircle
+                    .attr('fill', 'white');
+                d3.select('#ramen').style('background-color', 'cornflowerblue');
+                d3.select('#normal').style('background-color', 'rgb(47, 71, 116)');
+            })
+
         }
-        createNetwork();
+        createGraphs();
 
     </script>
 </body>

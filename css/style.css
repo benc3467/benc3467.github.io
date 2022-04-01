@@ -23,3 +23,22 @@ h1 {
 main {
     padding-bottom: 0;
 }
+
+#chord-container {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+#button-container {
+    width: 415;
+    margin: 0 auto;
+    margin-bottom: 100px;
+}
+
+#ramen {
+    margin-right: 20px;
+}
+
+#normal {
+    margin-left: 20px;
+}
