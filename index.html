@@ -24,6 +24,8 @@
                 Hopefully you will be able to learn things and take away something from this graph that
                 was not immediately clear from a simple linear viewing of the film.
             </article>
+
+            <h3>Characters connected by physical space</h3>
             <article>
                 Each node represents a character, and characters are connected with an edge if they appear in
                 the same shot at least once during the runtime of the film. They are considered to appear in the
@@ -35,6 +37,11 @@
     <div class="center">
         <svg id="network" height="500" width="1200"></svg>
     </div>
+    <main>
+        <section>
+            <h3>Characters connected by sharing meals</h3>
+        </section>
+    </main>
     <div id="chord-container">
         <svg id="chord" height="600" width="1000"></svg>
     </div>
@@ -416,7 +423,6 @@
 
             function updateChordLabel(event, d) {
                 let text = foodMatrix[d.source.index][d.target.index] + ' shared meals';
-                console.log(event);
                 let x = event.layerX;
                 let y = event.layerY;
                 chordLabel
@@ -444,7 +450,7 @@
                 .attr('cx', 0)
                 .attr('cy', 0)
                 .attr('r', 200)
-                .attr('fill', 'sandybrown');
+                .attr('fill', 'peru');
 
             console.log(chord);
             let group = chordDiagram.datum(chord)
@@ -477,7 +483,7 @@
                 )
                 .attr('class', 'ribbon')
                 // .style('fill', d => colors[d.source.index])
-                .style('fill', 'blanchedalmond')
+                .style('fill', 'palegoldenrod')
                 .style('stroke', 'black')
                 .style('opacity', 0.8)
                 .on('mouseover', mouseOverChord)
@@ -487,7 +493,6 @@
             function mouseOverChord(event, d) {
                 d3.select(this)
                     .attr('stroke-width', 2)
-                    .transition().duration(200)
                     .style('opacity', 1);
                 updateChordLabel(event, d3.select(this).datum());
             }
@@ -495,7 +500,6 @@
             function mouseLeaveChord(event, d) {
                 d3.select(this)
                     .attr('stroke-width', 1)
-                    .transition().duration(200)
                     .style('opacity', 0.8);
                 removeChordLabel();
             }
@@ -524,11 +528,11 @@
 
             d3.select('#ramen').on('click', () => {
                 d3.selectAll('.ribbon')
-                    .style('fill', 'blanchedalmond');
+                    .style('fill', 'palegoldenrod');
                 d3.selectAll('.outer-band')
                     .style('fill', 'darkred');
                 backgroundCircle
-                    .attr('fill', 'sandybrown');
+                    .attr('fill', 'peru');
                 d3.select('#ramen').style('background-color', 'rgb(47, 71, 116)');
                 d3.select('#normal').style('background-color', 'cornflowerblue');
             })
