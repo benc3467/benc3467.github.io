@@ -15,22 +15,16 @@
     <main>
         <section>
             <h1>Character Connections in Tampopo</h1>
-            <article>
-                Tampopo is a film with a multitude of characters, both in the main story and the many
-                vignettes. This graph attempts to capture the structure of Tampopo and display it in a
-                way that encourages the development of new understandings of the film.
-            </article>
-            <article>
-                Hopefully you will be able to learn things and take away something from this graph that
-                was not immediately clear from a simple linear viewing of the film.
-            </article>
+            <article id="warning">Note: the visualizations work best on Chrome and Firefox browsers</article>
 
-            <h3>Characters connected by physical space</h3>
+            <h3>Character relations structure</h3>
             <article>
                 Each node represents a character, and characters are connected with an edge if they appear in
                 the same shot at least once during the runtime of the film. They are considered to appear in the
-                same shot if they are either both visible on screen in a shot, or if they are implied to be in the
-                same shot even if one or both are not visible (such as if one is in a car in the background).
+                same shot if they are either both visible on screen in a shot or if they are implied to be in the
+                same shot even if one or both are not visible (such as if one is in a train in the background). Feel
+                free to hover over the nodes to reveal the corresponding character, and you can also click and drag
+                the nodes around.
             </article>
         </section>
     </main>
@@ -39,11 +33,16 @@
     </div>
     <main>
         <section>
-            <h3>Characters connected by sharing meals</h3>
+            <h3>Main cast relationships via sharing meals</h3>
+            <article>
+                Each wedge represents a character and the thickness of the bands connecting characters is based on
+                the number of times those characters share a food experience in the film. This could be eating together,
+                one preparing a meal for the other, sharing a drink, etc. Hover over bands to see exact counts.
+            </article>
         </section>
     </main>
     <div id="chord-container">
-        <svg id="chord" height="600" width="1000"></svg>
+        <svg id="chord" height="650" width="1000"></svg>
     </div>
     <div id="button-container">
         <button id="ramen">Ramen color scheme</button>
@@ -73,9 +72,6 @@
                 appearancesMatrix.push(row);
             }
 
-            console.log(appearancesMatrix);
-            console.log(nodes);
-
             let links = [];
 
             for (let i = 0; i < nodes.length; i++) {
@@ -88,8 +84,6 @@
                     }
                 }
             }
-            console.log(links);
-
 
             let sim = d3.forceSimulation()
                 .nodes(nodes)
@@ -106,12 +100,6 @@
                 return len;
             }
 
-            // TODO:
-            // - is it better for the tags and nodes to go above info box or below it?
-            // make the nodes and lines bigger?
-            // - write explanation of the graph above
-            // - check connections to see if they make sense
-            // - remove some characters?
             function render() {
                 // draw edges
                 let lines = networkLayer.selectAll('line.link').data(links)
@@ -357,11 +345,8 @@
             // - https://d3-graph-gallery.com/graph/chord_interactive.html
             // - https://d3-graph-gallery.com/graph/chord_axis_labels.html
 
-            // TODO:
-            // - check label distance - maybe varies per machine
             const chordSvg = d3.select('#chord');
             const foodData = await d3.csv("./data/food.csv");
-            console.log(foodData);
             let counts = {};
             let chordIDs = [0, 1, 2, 5, 15, 23]; // only look at certain characters
             let chordCharacters = [
@@ -381,10 +366,8 @@
                 23: 5
             }; // mapping the previous characterIDs to the new IDs
             let colors = ['cornflowerblue', 'tomato', 'white', 'darkolivegreen', 'blanchedalmond', 'black']
-            // let colors = ['blanchedalmond', 'rgb(195,138,138)', 'darkolivegreen', 'pink', 'rgb(193,224,137)']
 
             const foodMatrix = new Array(6).fill(0).map(() => new Array(6).fill(0));
-            console.log(foodMatrix);
 
             // convert to dense matrix and parse ints
             for (let link in foodData) {
@@ -396,16 +379,15 @@
 
                 }
             }
-            console.log(foodMatrix);
 
-            let chordDiagram = chordSvg.append('g').attr('transform', 'translate(500 300)');
+            let chordDiagram = chordSvg.append('g').attr('transform', 'translate(500 350)');
             let chord = d3.chord().sortSubgroups(d3.descending).padAngle(0.05)(foodMatrix);
 
             let chordLabelBackground = chordSvg
                 .append('rect')
                 .attr('class', 'label-background')
-                .attr('x', 0)
-                .attr('y', 0)
+                .attr('x', 350 - 3)
+                .attr('y', 50 - 12)
                 .attr('height', 22)
                 .attr('width', 0)
                 .attr('color', 'white')
@@ -419,25 +401,23 @@
                 .append('text')
                 .attr('dominant-baseline', 'middle')
                 .attr('id', 'label')
-                .attr('font-weight', 'bold');
+                .attr('font-weight', 'bold')
+                .attr('x', 350)
+                .attr('y', 50)
 
             function updateChordLabel(event, d) {
-                let text = foodMatrix[d.source.index][d.target.index] + ' shared meals';
-                let x = event.layerX;
-                let y = event.layerY;
+                let text = chordCharacters[d.source.index]['name'] + ' and ' +
+                    chordCharacters[d.target.index]['name'] + ' shared '
+                    + foodMatrix[d.source.index][d.target.index] + ' meals';
                 chordLabel
-                    .text(text)
-                    .attr('x', x + 17)
-                    .attr('y', y);
+                    .text(text);
 
                 // calculate width using length of string
                 let width = convertLength(text) + 6;
 
                 chordLabelBackground
                     .attr('visibility', '')
-                    .attr('width', width)
-                    .attr('x', x + 14)
-                    .attr('y', y - 12);
+                    .attr('width', width);
             }
 
             function removeChordLabel() {
@@ -452,7 +432,6 @@
                 .attr('r', 200)
                 .attr('fill', 'peru');
 
-            console.log(chord);
             let group = chordDiagram.datum(chord)
                 .append('g')
                 .selectAll('g')
