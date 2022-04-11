@@ -33,6 +33,37 @@
     </div>
     <main>
         <section>
+            <article>
+                Looking at the character visualization graph, we see a few distinct clusters of nodes – that is,
+                groups of characters that have notably more interactions with other characters in the same group.
+                An example of this is the main cluster centered around Tampopo which includes characters such as Goro,
+                Gun, Shohei, the ramen master, and many more.
+            </article>
+            <article>
+                Focusing on the central cluster of the film’s plot line – that is, Tampopo’s journey to perfecting
+                the art of ramen – we see the entire ensemble of characters that participate in her long road to
+                perfection. As Tampopo’s culinary skills develop and evolve throughout the film, she makes new friends
+                that each contribute to her improvement – her broth is improved by a noodle-making master who lost his
+                clinic and wife to his manager due to his overpowering love of ramen, her noodles are elevated by the
+                chauffeur/chef Shohei, her shop is revamped by the initially hostile and annoying Pisuken, and her
+                journey is made possible with Goro’s unrelenting support.
+            </article>
+            <article>
+                While Tampopo’s story drives the film’s plot forward, Itami intermingles the storyline with various
+                vignettes that range from comedic scenes of noodle-slurping to a white-suited gangster’s erotic
+                adventures with his similarly avid mistress. These vignettes can also be observed in the character
+                visualization graph; for instance, the scenes involving the white-suited gangsters are described by a
+                cluster in the bottom right hand corner. Clicking on the node itself, we see the character’s
+                interactions, which include the mistress as well as the pearl diver – two characters involved in scenes
+                whereby the white-suited gangster brings culinary appreciation to the next level in a comedic,
+                occasionally outrageous fashion. Other vignettes include the adventures of a con man who is also conned
+                himself, an old woman who can’t resist touching every interesting food item she comes across in a
+                supermarket, and a man whose family receives one last meal cooked by his dying wife.
+            </article>
+        </section>
+    </main>
+    <main>
+        <section>
             <h3>Main cast relationships via sharing meals</h3>
             <article>
                 Each wedge represents a character and the thickness of the bands connecting characters is based on
@@ -407,7 +438,7 @@
 
             function updateChordLabel(event, d) {
                 let text = chordCharacters[d.source.index]['name'] + ' and ' +
-                    chordCharacters[d.target.index]['name'] + ' shared '
+                    chordCharacters[d.target.index]['name'] + ' share '
                     + foodMatrix[d.source.index][d.target.index] + ' meals';
                 chordLabel
                     .text(text);
