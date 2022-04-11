@@ -32,11 +32,11 @@ main {
 #button-container {
     width: 415;
     margin: 0 auto;
-    margin-bottom: 100px;
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
+    margin-bottom: 50px;
 }
 
 #ramen {
@@ -49,4 +49,8 @@ main {
 
 #warning {
     color: slategray;
+}
+
+#end-paragraph {
+    margin-bottom: 100px;
 }

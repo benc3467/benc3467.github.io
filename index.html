@@ -79,6 +79,23 @@
         <button id="ramen">Ramen color scheme</button>
         <button id="normal">Normal color scheme</button>
     </div>
+    <main id="end-paragraph">
+        <section>
+            <article>
+                Inspecting the chord diagram more closely, we see Tampopo and Goro taking up a significant proportion of
+                the shared meals between the six characters in the main cast; this underscores the powerful dynamic
+                between the film’s beloved chivalrous cowboy hero and noodle-making turned master. Goro exemplifies
+                multiple admirable traits throughout the film – skillful, intelligent, courageous, strong, and
+                chivalrous – which are characteristic of a classic Western-style cowboy hero who saves a damsel in
+                distress (for instance, Tampopo and her initial struggles with Pisuken and an unhappy business).
+                However, Juzo Itami builds on this relationship by letting Goro take the sidelines as a mentor and
+                supporter who empowers Tampopo to take on the lead role of the film, gaining confidence and skills
+                throughout the film to ultimately reach the pinnacle of noodle-making mastery. While this dynamic plays
+                a key role in propelling the main plotline, the other few characters of the main cast also do their
+                parts in Tampopo’s entertaining journey.
+            </article>
+        </section>
+    </main>
 
     <script>
         // heavily inspired by Jeff R's INFO 3300 Fall 2021 notes
@@ -151,7 +168,7 @@
                             .attr('r', 10)
                             .attr('cx', 0)
                             .attr('cy', 0)
-                            .attr('fill', d => d.id === 0 ? 'sienna' : 'white')
+                            .attr('fill', d => d.id === 0 ? '#623400' : 'white')
                             .on('mouseover', handleHover)
                             .on('mousemove', handleHover)
                             .on('mouseout', handleMouseOut)
@@ -303,13 +320,13 @@
             function highlightConnections(ids) {
                 networkLayer
                     .selectAll('circle.node')
-                    .attr('fill', d => ids.includes(d.id) ? 'cornflowerblue' : d.id === 0 ? 'sienna' : 'white');
+                    .attr('fill', d => ids.includes(d.id) ? 'cornflowerblue' : d.id === 0 ? '#623400' : 'white');
             }
 
             function removeHighlights() {
                 networkLayer
                     .selectAll('circle.node')
-                    .attr('fill', d => d.id === 0 ? 'sienna' : 'white');
+                    .attr('fill', d => d.id === 0 ? '#623400' : 'white');
             }
 
             function dragStart(event, d) {
